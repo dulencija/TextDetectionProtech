@@ -27,10 +27,21 @@ std::string TesseractEngine::ModulePath()
 */
 TesseractEngine::TesseractEngine()
 {
+	//All languages list
+	//ara (Arabic), aze (Azerbauijani), bul (Bulgarian), cat (Catalan), ces (Czech), chi_sim (Simplified Chinese), chi_tra (Traditional Chinese), chr (Cherokee), dan (Danish), dan-frak (Danish (Fraktur)), deu (German), ell (Greek), eng (English), enm (Old English), epo (Esperanto), est (Estonian), fin (Finnish), fra (French), frm (Old French), glg (Galician), heb (Hebrew), hin (Hindi), hrv (Croation), hun (Hungarian), ind (Indonesian), ita (Italian), jpn (Japanese), kor (Korean), lav (Latvian), lit (Lithuanian), nld (Dutch), nor (Norwegian), pol (Polish), por (Portuguese), ron (Romanian), rus (Russian), slk (Slovakian), slv (Slovenian), sqi (Albanian), spa (Spanish), srp (Serbian), swe (Swedish), tam (Tamil), tel (Telugu), tgl (Tagalog), tha (Thai), tur (Turkish), ukr (Ukrainian), vie (Vietnamese)
+
+	//eng(English)
+	//chi_sim(Simplified Chinese), chi_tra(Traditional Chinese)
+	//ind(Indonesian)
+	//hin(Hindi)
+	//jpn(Japanese)
+	//kor(Korean)
+	//tha(Thai)
+
 	m_lang = "eng";
 	setPageSegMode(tesseract::PSM_SINGLE_BLOCK);
 	m_mode = tesseract::OEM_TESSERACT_ONLY;
-	//setSpeed(Engine::FAST);
+	bool suc = setVariable("load_system_dawg", "0");
 }
 
 
@@ -119,11 +130,17 @@ Pix* TesseractEngine::createPix(int width, int height, int depth, int widthStep,
 	pixSetColormap(pix, NULL);
 
 	int length = height*widthStep;
-	l_uint32* datas = new l_uint32[length];
+
+	if (m_datas != NULL)
+	{
+		delete[] m_datas;
+		m_datas = NULL;
+	}
+	m_datas = new l_uint32[length];
 
 	// get a copy of the image data
-	memcpy(datas, reinterpret_cast<const l_uint32*>(imageData), length);
-	pixSetData(pix, datas);
+	memcpy(m_datas, reinterpret_cast<const l_uint32*>(imageData), length);
+	pixSetData(pix, m_datas);
 
 	// correct the endianess
 	pixEndianByteSwap(pix);
@@ -138,6 +155,7 @@ Pix* TesseractEngine::createPix(int width, int height, int depth, int widthStep,
 */
 void TesseractEngine::setImage(const cv::Mat &image)
 {
+	
 	if (image.data == NULL)
 	{
 		return;
@@ -185,8 +203,11 @@ void TesseractEngine::setImage(const cv::Mat &image)
 	default:
 		break;
 	}
-
-	m_tessBase.SetImage(m_pix);
+	if (m_pix != 0)
+	{
+		m_tessBase.SetImage(m_pix);
+		//std::cout << "Slika podesena! " << std::endl;
+	}
 }
 
 
@@ -220,12 +241,21 @@ bool TesseractEngine::setVariable(std::string name, std::string value)
 STRING TesseractEngine::processPage()
 {
 	STRING text_out;
-	if (!m_tessBase.ProcessPage(m_pix, NULL, 0, NULL, 5000, &text_out))
+	if (!m_tessBase.ProcessPage(m_pix, NULL, 0, NULL, 3000, &text_out))
 	{
-		printf("Error during processing.\n");
+		;//printf("Error during processing.\n");
 	}
 
-	pixDestroy(&m_pix);
+	//pixDestroy(&m_pix);
 
 	return text_out;
+}
+
+void TesseractEngine::getWordsCount(int & WCount, int & LCount)
+{
+	Boxa* bounds = m_tessBase.GetWords(NULL);
+	WCount = (int)bounds->n;
+	
+	Boxa* boundsLines = m_tessBase.GetTextlines(NULL, NULL);
+	LCount = (int)boundsLines->n;
 }

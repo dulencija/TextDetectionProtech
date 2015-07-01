@@ -41,9 +41,12 @@
 
 		STRING processPage();
 
+		void getWordsCount(int & WCount, int & LCount);
+
 	private:
 		std::string m_lang;
-		Pix* m_pix;
+		Pix* m_pix = 0;
+		l_uint32* m_datas = NULL;
 
 		tesseract::TessBaseAPI m_tessBase;
 		tesseract::OcrEngineMode m_mode;
@@ -52,6 +55,8 @@
 		Pix* createPix(int width, int height, int depth, int widthStep, const int *imageData);
 
 		std::string ModulePath();
+
+		
 	};
 
 
