@@ -33,9 +33,10 @@ std::string protech::TextDetector::ModulePathA()
 * \brief initialize - Method for initializing Tesseract and setting up parameters.
 * \param [in] std::string _OUTPUT_FOLDER_PATH - output folder.
 */
-void  protech::TextDetector::initialize(std::string _OUTPUT_FOLDER_PATH)
+void  protech::TextDetector::initialize(std::string _OUTPUT_FOLDER_PATH, std::string _LANGUAGE)
 {
 	OUTPUT_FOLDER_PATH = _OUTPUT_FOLDER_PATH;
+	LANGUAGE = _LANGUAGE;
 	std::string tessdataPath = ModulePathA() + "//";
 	tessEngine.initialize(tessdataPath);
 }
@@ -576,6 +577,9 @@ void protech::TextDetector::textDetectionFunction(cv::Mat & currentframe, std::s
 			}
 
 			rectsToRemove.push_back(rd);
+
+			if (!whereToSeparate.empty())
+				whereToSeparate.clear();
 		}
 		
 		//cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_vertical_" + boost::lexical_cast<std::string>(rd)+".jpg"), vertical);
@@ -631,7 +635,6 @@ void protech::TextDetector::textDetectionFunction(cv::Mat & currentframe, std::s
 		}
 	}
 
-	
 
 	//Labeling 
 	std::vector<cv::Rect> superBoundingBoxes;
@@ -644,12 +647,9 @@ void protech::TextDetector::textDetectionFunction(cv::Mat & currentframe, std::s
 	}
 	for (int rd = 0; rd < superBoundingBoxes.size(); rd++)
 	{
-		//cv::rectangle(large, superBoundingBoxes[rd], cv::Scalar(255, 0, 0), 2);
+		cv::rectangle(large, superBoundingBoxes[rd], cv::Scalar(255, 255, 0), 2);
 		cv::rectangle(superRectMask, superBoundingBoxes[rd], cv::Scalar(255), -1);
 	}
-
-	//cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_allRects.jpg"), large);
-	//cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_superRectMask.jpg"), superRectMask);
 
 	cv::Mat connectedRects;
 	cv::Mat morphKernel_1 = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2, 2));
@@ -677,17 +677,34 @@ void protech::TextDetector::textDetectionFunction(cv::Mat & currentframe, std::s
 		//std::cout << "wordsCount: " << wordsCount << std::endl;
 		//std::cout << "linesCount: " << linesCount << std::endl;
 
-		//if ((linesCount > 1) && (wordsCount > 1) && (tmoStringRes.length() > 2))//CHINESE LANG
-		std::string newRes = boost::erase_all_regex_copy(tmoStringRes, boost::regex("[^a-zA-Z0-9]+"));//ENGLISH LANG
-		if ( (wordsCount > 6) || (((wordsCount > 3) && (linesCount > 1)) && (wordsCount >= 2 * linesCount)) && (newRes.length() > 8))// (newRes.length() < 3)//ENGLISH LANG
+		if (LANGUAGE == "eng" )
 		{
-			cv::rectangle(currentframeBkp, v_new_component_rects02[rc], cv::Scalar(0, 255, 0), 2);
-			cv::rectangle(connectedRectsRectMask, v_new_component_rects02[rc], cv::Scalar(255), -1);
+			std::string newRes = boost::erase_all_regex_copy(tmoStringRes, boost::regex("[^a-zA-Z0-9]+"));//ENGLISH LANG
+			if ((wordsCount > 6) || (((wordsCount > 3) && (linesCount > 1)) && (wordsCount >= 2 * linesCount)) && (tmoStringRes.length() > 8))// (newRes.length() < 3)//ENGLISH LANG
+			{
+				cv::rectangle(currentframeBkp, v_new_component_rects02[rc], cv::Scalar(0, 255, 0), 2);
+				cv::rectangle(connectedRectsRectMask, v_new_component_rects02[rc], cv::Scalar(255), -1);
+			}
+			else
+			{
+				cv::rectangle(connectedRectsFF, v_new_component_rects02[rc], cv::Scalar(0), -1);
+				cv::rectangle(currentframeBkp, v_new_component_rects02[rc], cv::Scalar(0, 0, 255), 2);
+			}
 		}
-		else
+		else if ((LANGUAGE == "chi_sim") || (LANGUAGE == "jpn") || (LANGUAGE == "tha") || (LANGUAGE == "kor") || (LANGUAGE == "hin") || (LANGUAGE == "ind"))
 		{
-			cv::rectangle(connectedRectsFF, v_new_component_rects02[rc], cv::Scalar(0), -1);
+			if ((linesCount > 1) && (wordsCount > 1) && (tmoStringRes.length() > 3))//CHINESE - JAPANESE LANG
+			{
+				cv::rectangle(currentframeBkp, v_new_component_rects02[rc], cv::Scalar(0, 255, 0), 2);
+				cv::rectangle(connectedRectsRectMask, v_new_component_rects02[rc], cv::Scalar(255), -1);
+			}
+			else
+			{
+				cv::rectangle(connectedRectsFF, v_new_component_rects02[rc], cv::Scalar(0), -1);
+				cv::rectangle(currentframeBkp, v_new_component_rects02[rc], cv::Scalar(0, 0, 255), 2);
+			}
 		}
+
 
 		if (tmpImage.data != NULL)
 			tmpImage.release();
@@ -710,6 +727,9 @@ void protech::TextDetector::textDetectionFunction(cv::Mat & currentframe, std::s
 	//write imgs
 	cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_masked.jpg"), currentframeBkp1);
 	cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_rects.jpg"), currentframeBkp);
+	//cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_superRectMask.jpg"), superRectMask);
+	//cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_newRects.jpg"), currentframeBkp2);
+	//cv::imwrite(OUTPUT_FOLDER_PATH + "//" + std::string(img_name + "_allRects.jpg"), large);
 
 	//clear data
 	if (large.data != NULL)

@@ -24,6 +24,7 @@ using namespace std;
 
 string INPUT_FOLDER_PATH;
 string OUTPUT_FOLDER_PATH;
+string LANGUAGE;
 
 /**
 * \brief ModulePathA - This method finds directory where app executable is located.
@@ -155,6 +156,75 @@ int main(int argc, char *argv[])
 	{
 		INPUT_FOLDER_PATH = argv[1];
 		OUTPUT_FOLDER_PATH = argv[2];
+		LANGUAGE = "eng";
+	}
+	else if (argc == 4)
+	{
+		INPUT_FOLDER_PATH = argv[1];
+		OUTPUT_FOLDER_PATH = argv[2];
+		std::string tmpLang = argv[3];
+
+		if (tmpLang == "English")
+		{
+			LANGUAGE = "eng";
+		}
+		else if (tmpLang == "english")
+		{
+			LANGUAGE = "eng";
+		}
+		else if (tmpLang == "Chinese")
+		{
+			LANGUAGE = "chi_sim";
+		}
+		else if (tmpLang == "chinese")
+		{
+			LANGUAGE = "chi_sim";
+		}
+		else if (tmpLang == "Indonesian")
+		{
+			LANGUAGE = "ind";
+		}
+		else if (tmpLang == "indonesian")
+		{
+			LANGUAGE = "ind";
+		}
+		else if (tmpLang == "Hindi")
+		{
+			LANGUAGE = "hin";
+		}
+		else if (tmpLang == "hindi")
+		{
+			LANGUAGE = "hin";
+		}
+		else if (tmpLang == "Japanese")
+		{
+			LANGUAGE = "jpn";
+		}
+		else if (tmpLang == "japanese")
+		{
+			LANGUAGE = "jpn";
+		}
+		else if (tmpLang == "Korean")
+		{
+			LANGUAGE = "kor";
+		}
+		else if (tmpLang == "korean")
+		{
+			LANGUAGE = "kor";
+		}
+		else if (tmpLang == "Thai")
+		{
+			LANGUAGE = "tha";
+		}
+		else if (tmpLang == "thai")
+		{
+			LANGUAGE = "tha";
+		}
+		else
+		{
+			cout << "Bad Language Argument, using English language instead..." << endl;
+			LANGUAGE = "eng";
+		}
 	}
 	else
 	{
@@ -167,7 +237,7 @@ int main(int argc, char *argv[])
 	boost::posix_time::ptime end;
 
 	protech::TextDetector textDetextor;
-	textDetextor.initialize(OUTPUT_FOLDER_PATH);
+	textDetextor.initialize(OUTPUT_FOLDER_PATH, LANGUAGE);
 	
 	vector<boost::filesystem::path> m_ImagesFromFolder;
 	m_ImagesFromFolder = listFiles(INPUT_FOLDER_PATH);

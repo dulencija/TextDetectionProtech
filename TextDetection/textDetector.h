@@ -1,4 +1,12 @@
 
+/*!\file textDetector.h
+*
+*	Header for TextDetector used in TextDetection project.
+*	\author Marko Macesic & Dusko Petrovic
+*	\date Created: 08th June 2015.
+*	\date Last Revision: 01th July 2013.
+*/
+
 #ifndef TEXT_DETECTOR_H
 #define TEXT_DETECTOR_H
 
@@ -30,6 +38,7 @@ namespace protech
 	private:
 		TesseractEngine tessEngine;//!< Tesseract engine object.
 		std::string OUTPUT_FOLDER_PATH;//!< output folder path.
+		std::string LANGUAGE;//!< Detection language.
 
 		std::string ModulePathA();
 		void getTextInfoTesseract(const cv::Mat & inputImg, std::string & result, int & lineCount, int & wordCount);
@@ -45,7 +54,7 @@ namespace protech
 		TextDetector(){};
 		~TextDetector();		
 		
-		void initialize(std::string _OUTPUT_FOLDER_PATH);
+		void initialize(std::string _OUTPUT_FOLDER_PATH, std::string _LANGUAGE);
 		void clear();
 		void textDetectionFunction(cv::Mat & currentframe, std::string img_name);
 	};

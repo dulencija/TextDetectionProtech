@@ -1,4 +1,12 @@
 
+/*!\file tesseract_engine.h
+*
+*	Header for TesseractEngine used in TextDetection project.
+*	\author Marko Macesic & Dusko Petrovic
+*	\date Created: 15th June 2015.
+*	\date Last Revision: 01th July 2013.
+*/
+
 #ifndef OCR_ENGINE_TESSERACT_H
 #define OCR_ENGINE_TESSERACT_H
 
@@ -22,7 +30,7 @@
 
 	public:
 		TesseractEngine();
-
+		TesseractEngine(std::string language);
 		~TesseractEngine();
 
 		/* interface functions */

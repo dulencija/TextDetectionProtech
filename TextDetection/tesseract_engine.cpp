@@ -25,7 +25,7 @@ std::string TesseractEngine::ModulePath()
 /**
 * \brief TesseractEngine::TesseractEngine - constructor.
 */
-TesseractEngine::TesseractEngine()
+TesseractEngine::TesseractEngine(std::string language)
 {
 	//All languages list
 	//ara (Arabic), aze (Azerbauijani), bul (Bulgarian), cat (Catalan), ces (Czech), chi_sim (Simplified Chinese), chi_tra (Traditional Chinese), chr (Cherokee), dan (Danish), dan-frak (Danish (Fraktur)), deu (German), ell (Greek), eng (English), enm (Old English), epo (Esperanto), est (Estonian), fin (Finnish), fra (French), frm (Old French), glg (Galician), heb (Hebrew), hin (Hindi), hrv (Croation), hun (Hungarian), ind (Indonesian), ita (Italian), jpn (Japanese), kor (Korean), lav (Latvian), lit (Lithuanian), nld (Dutch), nor (Norwegian), pol (Polish), por (Portuguese), ron (Romanian), rus (Russian), slk (Slovakian), slv (Slovenian), sqi (Albanian), spa (Spanish), srp (Serbian), swe (Swedish), tam (Tamil), tel (Telugu), tgl (Tagalog), tha (Thai), tur (Turkish), ukr (Ukrainian), vie (Vietnamese)
@@ -38,6 +38,18 @@ TesseractEngine::TesseractEngine()
 	//kor(Korean)
 	//tha(Thai)
 
+	m_lang = language;
+	setPageSegMode(tesseract::PSM_SINGLE_BLOCK);
+	m_mode = tesseract::OEM_TESSERACT_ONLY;
+	bool suc = setVariable("load_system_dawg", "0");
+}
+
+
+/**
+* \brief TesseractEngine::TesseractEngine - constructor.
+*/
+TesseractEngine::TesseractEngine()
+{
 	m_lang = "eng";
 	setPageSegMode(tesseract::PSM_SINGLE_BLOCK);
 	m_mode = tesseract::OEM_TESSERACT_ONLY;
@@ -241,7 +253,7 @@ bool TesseractEngine::setVariable(std::string name, std::string value)
 STRING TesseractEngine::processPage()
 {
 	STRING text_out;
-	if (!m_tessBase.ProcessPage(m_pix, NULL, 0, NULL, 3000, &text_out))
+	if (!m_tessBase.ProcessPage(m_pix, NULL, 0, NULL, 10000, &text_out))
 	{
 		;//printf("Error during processing.\n");
 	}
